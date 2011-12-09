@@ -1,0 +1,32 @@
+== Synopsys
+Class-level configuration DSL
+
+== Installation
+  gem install config_accessor
+
+== Examples
+  require 'config_accessor'
+
+  class Remote
+    config_accessor :host, :default => "localhost"
+    config_accessor :port, :default => "80", :transform => :to_i
+    config_accessor :proxy_host, :proxy_port
+  end
+
+  class Local < Remote
+    config_accessor :l_port
+  end
+
+  Remote.host        # => "localhost"
+  Remote.port        # => 80
+  Remote.proxy_host  # => nil
+
+  r = Remote.new
+
+  r.port = "81"
+  r.port             # => 81
+  Remote.port        # => 80
+  Remote.port = 82
+  r.port             # => 81
+
+  Local.port         # => 80
