@@ -1,4 +1,5 @@
 require "config_accessor/version"
+require "config_accessor/config"
 require "config_accessor/class_methods"
 require "config_accessor/instance_methods"
 

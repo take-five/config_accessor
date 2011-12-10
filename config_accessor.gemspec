@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.email       = ["amikhailov83@gmail.com"]
   s.homepage    = "https://github.com/take-five/config_accessor"
   s.summary     = %q{Class-level configurations}
+  s.description = File.read(File.expand_path('../README.rdoc', __FILE__))
 
   s.rubyforge_project = "config_accessor"
 

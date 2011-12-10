@@ -29,6 +29,22 @@ Class-level configuration DSL
   r.port             # => 81
   Remote.port        # => 80
   Remote.port = 82
-  r.port             # => 81
 
+  # next expressions are equivalent
+  r.port             # => 81
+  r.config[:port]    # => 81
+  r.config["port"]   # => 81
+  r.config.port      # => 81
+
+  # It supports inheritance, subclasses cannot change superclasses configurations
   Local.port         # => 80
+
+  # You can do it with +configure+ method
+  Local.configure do
+    port 81
+  end
+
+  # or
+  Local.configure do |config|
+    config.port 81
+  end

@@ -1,33 +1,42 @@
 module ConfigAccessor
   # Both instance and class-level methods
   module InstanceMethods
+    # Sexy notation:
+    #   class Tank
+    #     config_accessor :target
+    #   end
+    #
+    #   Tank.configure {
+    #     target "localhost:80"
+    #   }
+    #
+    # or (result is the same):
+    #   Tank.configure do |conf|
+    #     conf.target "localhost:80"
+    #   end
     def configure(&block)
       raise ArgumentError, 'Block expected' unless block_given?
 
-      self.instance_eval(&block)
-
-      self
+      if block.arity == 1
+        yield(config)
+      else
+        config.instance_eval(&block)
+      end
     end
 
-    # Writes names configuration value
-    def write_config_value(name, value)
-      (@_config_accessors ||= {})[name.to_sym] = value
-    end
-
-    # Reads configuration value (supports inheritance)
-    def read_config_value(name)
-      parent_config_accessors.merge(@_config_accessors || {})[name.to_sym]
+    # Direct access to configuration values
+    def config
+      if self.is_a?(Class)
+        @_config ||= ConfigAccessor::Config.new(parent_config)
+      else
+        @_config ||= self.class.config.dup
+      end
     end
 
     protected
-    # inheritable config accessors array
-    def defined_config_accessors #:nodoc:
-      @_config_accessors ||= {}
-    end
-
-    def parent_config_accessors #:nodoc:
+    def parent_config #:nodoc:
       superklass = (self.is_a?(Class) ? self : self.class).superclass
-      superklass.respond_to?(:defined_config_accessors) ? superklass.defined_config_accessors : {}
+      superklass.respond_to?(:config) ? superklass.config : {}
     end
   end
 end

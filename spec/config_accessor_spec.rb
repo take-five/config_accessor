@@ -103,4 +103,31 @@ describe ConfigAccessor do
     c.port "80"
     c.port.should eq(80)
   end
+
+  it "should be configurable through configure method" do
+    c = Class.new {
+      configurable!
+      config_accessor :port
+    }
+
+    c.configure {
+      port 80
+    }
+    c.port.should eq(80)
+  end
+
+  it "should be compatable with ActiveSupport::Configurable" do
+    c = Class.new {
+      configurable!
+      config_accessor :port
+    }
+
+    i = c.new
+    i.port = 80
+
+    i.config[:port].should eq(80)
+
+    i.configure { |conf| conf[:port] = 81 }
+    i.port.should eq(81)
+  end
 end
