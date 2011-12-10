@@ -28,22 +28,31 @@ describe ConfigAccessor do
     }
     d = Class.new(c) {}
     instance = c.new
+
     c.port.should eq(80)
     instance.port.should eq(80)
+    d.port.should eq(80)
+
+    instance.port 81
     d.port.should eq(80)
   end
 
   it "should not mutate class configuration through instance" do
     c = Class.new {
-      config_accessor :port
+      config_accessor :port, :ary
       port 80
+      ary []
     }
     instance = c.new
 
     instance.port 81
+    instance.ary << 1
 
     instance.port.should eq(81)
+    instance.ary.should eq([1])
+
     c.port.should eq(80)
+    c.ary.should eq([])
 
     c.port 82
     instance.port.should eq(81)

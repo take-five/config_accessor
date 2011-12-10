@@ -9,6 +9,27 @@ module ConfigAccessor
 
       self
     end
+
+    # Writes names configuration value
+    def write_config_value(name, value)
+      (@_config_accessors ||= {})[name.to_sym] = value
+    end
+
+    # Reads configuration value (supports inheritance)
+    def read_config_value(name)
+      parent_config_accessors.merge(@_config_accessors || {})[name.to_sym]
+    end
+
+    protected
+    # inheritable config accessors array
+    def defined_config_accessors #:nodoc:
+      @_config_accessors ||= {}
+    end
+
+    def parent_config_accessors #:nodoc:
+      superklass = (self.is_a?(Class) ? self : self.class).superclass
+      superklass.respond_to?(:defined_config_accessors) ? superklass.defined_config_accessors : {}
+    end
   end
 
   # config_accessor(symbol...) => nil
@@ -49,31 +70,17 @@ module ConfigAccessor
 
   # Clone class-level configuration for each instance
   def new(*args, &block) #:nodoc:
-    @config_options ||= []
-
     super(*args, &block).tap do |instance|
-      defined_config_accessors.each do |var_name|
-        val = instance_variable_get(var_name)
-
-        instance.instance_variable_set(var_name, ConfigAccessor.try_duplicate(val))
+      # clone class-level variables
+      defined_config_accessors.each do |name, val|
+        instance.write_config_value(name, ConfigAccessor.try_duplicate(val))
       end
     end
   end
 
   private
-  # inheritable config accessors array
-  def defined_config_accessors #:nodoc:
-    @_config_accessors       ||= {}
-    @_config_accessors[self] ||= (@_config_accessors[superclass] || []).dup
-  end
-
   # create universal config accessor
   def define_config_accessor(name, options) #:nodoc:
-    ivar_name = :"@_#{name}"
-
-    # inheritable config accessors hash
-    defined_config_accessors << ivar_name
-
     transform = if t = options.delete(:transform)
       raise TypeError, 'transformer must be Symbol, Method or Proc' unless t.respond_to?(:to_proc)
       t.to_proc
@@ -82,7 +89,7 @@ module ConfigAccessor
     # create accessor
     accessor = proc do |*args, &block|
       if args.empty? && !block # reader
-        instance_variable_get(ivar_name)
+        read_config_value(name)
       else # writer
         raise ArgumentError, 'Too many arguments (%s for 1)' % args.length if args.length > 1
 
@@ -91,7 +98,7 @@ module ConfigAccessor
         val = transform.call(val) if transform.is_a?(Proc)
 
         # set
-        instance_variable_set(ivar_name, val)
+        write_config_value(name, val)
       end
     end
 
