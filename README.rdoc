@@ -8,6 +8,8 @@ Class-level configuration DSL
   require 'config_accessor'
 
   class Remote
+    configurable!
+
     config_accessor :host, :default => "localhost"
     config_accessor :port, :default => "80", :transform => :to_i
     config_accessor :proxy_host, :proxy_port

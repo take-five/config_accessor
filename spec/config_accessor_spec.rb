@@ -3,6 +3,8 @@ require File.expand_path('../test_helper', __FILE__)
 describe ConfigAccessor do
   it "should be configurable" do
     c = Class.new {
+      configurable!
+
       config_accessor :a
     }
     c.should respond_to(:a)
@@ -13,6 +15,8 @@ describe ConfigAccessor do
 
   it "should be configurable in subclasses" do
     c = Class.new {
+      configurable!
+
       config_accessor :a
     }
     d = Class.new(c) {}
@@ -23,6 +27,8 @@ describe ConfigAccessor do
 
   it "should be able to set configuration values" do
     c = Class.new {
+      configurable!
+
       config_accessor :port
       port 80
     }
@@ -39,6 +45,8 @@ describe ConfigAccessor do
 
   it "should not mutate class configuration through instance" do
     c = Class.new {
+      configurable!
+
       config_accessor :port, :ary
       port 80
       ary []
@@ -60,6 +68,8 @@ describe ConfigAccessor do
 
   it "should be able to set default values" do
     c = Class.new {
+      configurable!
+
       config_accessor :port, :default => 80
     }
     c.port.should eq(80)
@@ -67,6 +77,8 @@ describe ConfigAccessor do
 
   it "should be able to define aliases" do
     c = Class.new {
+      configurable!
+
       config_accessor :port, :alias => :inferred_port, :default => 80
     }
     c.inferred_port.should eq(80)
@@ -74,6 +86,8 @@ describe ConfigAccessor do
 
   it "should accept blocks as values" do
     c = Class.new {
+      configurable!
+
       config_accessor :transformer
       transformer { 22 }
     }
@@ -82,6 +96,8 @@ describe ConfigAccessor do
 
   it "should transform values" do
     c = Class.new {
+      configurable!
+
       config_accessor :port, :transform => :to_i
     }
     c.port "80"
