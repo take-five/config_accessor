@@ -38,12 +38,14 @@ module ConfigAccessor
 
     # Clone class-level configuration for each instance
     def new(*args, &block) #:nodoc:
-      super(*args, &block).tap do |instance|
-        # clone class-level variables
-        defined_config_accessors.each do |name, val|
-          instance.write_config_value(name, ConfigAccessor.try_duplicate(val))
-        end
+      instance = super(*args, &block)
+
+      # clone class-level variables
+      defined_config_accessors.each do |name, val|
+        instance.write_config_value(name, ConfigAccessor.try_duplicate(val))
       end
+
+      instance
     end
 
     private
